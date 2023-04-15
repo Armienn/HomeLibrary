@@ -1,10 +1,10 @@
 {
-  "name": "Example Plugin",
-  "author": "John Doe",
+  "name": "Home Library",
+  "author": "Armienn",
   "flags": ["debug", "_root"],
   "publish": {
     "tags": ["template", "root"],
-    "description": "Decky example plugin.",
+    "description": "A Decky plugin to add collections to the Steam Deck homepage.",
     "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
   }
 }
