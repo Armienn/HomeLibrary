@@ -1,4 +1,5 @@
 import {
+	afterPatch,
 	ButtonItem,
 	definePlugin,
 	DialogButton,
@@ -9,12 +10,19 @@ import {
 	Router,
 	ServerAPI,
 	showContextMenu,
-	staticClasses,
+	staticClasses
 } from "decky-frontend-lib"
 import { VFC } from "react"
 import { FaShip } from "react-icons/fa"
 
 import logo from "../assets/logo.png"
+
+const collectionLinks = [
+	{ text: "NES", path: "/library/collection/srm-TkVT" },
+	{ text: "SNES", path: "/library/collection/srm-U05FUw%3D%3D" },
+	{ text: "N64", path: "/library/collection/srm-TjY0" },
+	{ text: "GameBoy", path: "/library/collection/srm-R2FtZUJveQ%3D%3D" },
+]
 
 // interface AddMethodArgs {
 //   left: number
@@ -89,17 +97,62 @@ const DeckyPluginRouterTest: VFC = () => {
 	)
 }
 
+const HomePatch = async (props: any) => {
+	afterPatch(props.children, "type", patchOne)
+}
+
+function patchOne(_: any, ret: any) {
+	afterPatch(ret.type, "type", patchTwo)
+	return ret
+}
+
+function patchTwo(_: any, ret: any) {
+	const tabbedContent = ret.props?.children?.props?.children?.props?.children?.props?.children?.[1]?.props
+	if (!tabbedContent)
+		return
+	afterPatch(tabbedContent.children.type, "type", patchThree)
+	return ret
+}
+
+function patchThree(_: any, ret: any) {
+	const tab = ret.props?.tabs?.[0]
+	if (!tab)
+		return
+	afterPatch(tab.content, "type", patchFour)
+	return ret
+}
+
+function patchFour(_: any, ret: any) {
+	const elements: any[] = ret.props.children
+	const links = collectionLinks.map(x =>
+		<DialogButton onClick={() => Router.Navigate(x.path)}>
+			{x.text}
+		</DialogButton>
+	)
+	if (elements[0].props.id === "armienn-home-library")
+		elements.shift()
+	elements.unshift(
+		<div id="armienn-home-library">{links}</div>
+	)
+	console.log("updated:")
+	console.log(ret)
+	return ret
+}
+
 export default definePlugin((serverApi: ServerAPI) => {
 	serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
 		exact: true,
 	})
 
+	const myPatch = serverApi.routerHook.addPatch('/library/home', x => { HomePatch(x); return x })
+
 	return {
-		title: <div className={staticClasses.Title}>Example Plugin</div>,
+		title: <div className={staticClasses.Title}>Home Library</div>,
 		content: <Content serverAPI={serverApi} />,
 		icon: <FaShip />,
 		onDismount() {
 			serverApi.routerHook.removeRoute("/decky-plugin-test")
+			serverApi.routerHook.removePatch('/library/home', myPatch)
 		},
 	}
 })
