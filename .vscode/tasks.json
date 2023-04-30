@@ -111,6 +111,23 @@
                 // ,"restartloader"
             ],
             "problemMatcher": []
+        },
+        // MY STUPID ADDITIONS THAT WORK ON WINDOWS
+        {
+            "label": "removedist",
+            "detail": "Delete the existing dist folder on the deck",
+            "type": "shell",
+            "group": "none",
+            "command": "ssh deck@${config:deckip} 'rm -r ~/homebrew/plugins/HomeLibrary/dist/*'",
+            "problemMatcher": []
+        },
+        {
+            "label": "deploydist",
+            "detail": "Copy the dist folder to the deck",
+            "type": "shell",
+            "group": "none",
+            "command": "scp -r ./dist deck@${config:deckip}:~/homebrew/plugins/HomeLibrary",
+            "problemMatcher": []
         }
     ]
 }
